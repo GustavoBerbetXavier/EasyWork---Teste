@@ -40,7 +40,7 @@ type Draft = Pick<
 
 export default function PerfilScreen() {
   const params = useLocalSearchParams<{ editar?: string }>();
-  const { userId, profile, privateInfo, email, emailConfirmed, isDemo, saveProfile, signOut } = useSignedIn();
+  const { userId, profile, privateInfo, email, emailConfirmed, saveProfile, signOut } = useSignedIn();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(() => toDraft(profile, privateInfo, email));
   const [saving, setSaving] = useState(false);
@@ -153,7 +153,7 @@ export default function PerfilScreen() {
     <ScrollView style={styles.screenBg} contentContainerStyle={styles.profilePage} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       <ProfileCover
         profile={profile}
-        verified={emailConfirmed && !isDemo}
+        verified={emailConfirmed}
         editing={editing}
         draftName={draft.full_name}
         draftUsername={draft.username}
@@ -393,7 +393,6 @@ export default function PerfilScreen() {
         <AppIcon name="log-out-outline" size={18} color={C.red} />
         <Text style={styles.logoutText}>Sair da conta</Text>
       </TouchableOpacity>
-      {isDemo ? <Text style={styles.profileDemoFooter}>Modo de demonstração: as alterações ficam só nesta sessão do aplicativo.</Text> : null}
 
       <CityPicker visible={cityPicker} current={draft.city} onClose={() => setCityPicker(false)} onSelect={(value) => { set('city', value); setCityPicker(false); }} />
     </ScrollView>

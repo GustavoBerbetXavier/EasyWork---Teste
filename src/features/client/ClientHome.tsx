@@ -17,7 +17,7 @@ import { styles } from '@/theme/styles';
 
 
 export function ClientHome() {
-  const { profile, isDemo, saveProfile } = useSignedIn();
+  const { profile, saveProfile } = useSignedIn();
   const [search, setSearch] = useState('');
   const [cityPicker, setCityPicker] = useState(false);
   const [allCategories, setAllCategories] = useState(false);
@@ -28,13 +28,12 @@ export function ClientHome() {
   const load = useCallback(async () => {
     try {
       setError(null);
-      // No modo demonstração os perfis de exemplo aparecem em qualquer cidade.
-      const list = await searchProviders({ city: isDemo ? '' : city });
+      const list = await searchProviders({ city });
       setProviders(list.slice(0, 3));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível carregar os profissionais.');
     }
-  }, [city, isDemo]);
+  }, [city]);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,7 +104,7 @@ export function ClientHome() {
       {error ? <ErrorBanner message={error} onRetry={load} /> : null}
       {providers === null && !error ? <View style={{ height: 120 }}><LoadingView /></View> : null}
       {providers?.map((provider) => (
-        <ProviderCard key={provider.id} provider={provider} demo={isDemo} onPress={() => router.push(`/profissional/${provider.id}`)} />
+        <ProviderCard key={provider.id} provider={provider} onPress={() => router.push(`/profissional/${provider.id}`)} />
       ))}
       {providers && providers.length === 0 ? (
         <EmptyState

@@ -10,7 +10,7 @@ import { C } from '@/theme/colors';
 import { styles } from '@/theme/styles';
 
 export default function MensagensScreen() {
-  const { profile, isDemo } = useSignedIn();
+  const { profile } = useSignedIn();
   const { conversations, loading, error, refresh } = useInbox();
   const [search, setSearch] = useState('');
   const [unreadOnly, setUnreadOnly] = useState(false);
@@ -63,7 +63,6 @@ export default function MensagensScreen() {
       </View>
       <View style={styles.inboxLabelRow}>
         <Text style={inbox.recent}>Recentes</Text>
-        {isDemo ? <Text style={styles.demoDataLabel}>DADOS DEMONSTRATIVOS</Text> : null}
       </View>
       {error ? <ErrorBanner message={error} onRetry={refresh} /> : null}
       {loading && conversations.length === 0 ? <ActivityIndicator color={C.teal} /> : null}

@@ -21,7 +21,7 @@ const TONES: Record<PlanTone, { card: object; bar: string; iconBg: string; iconC
 };
 
 export default function PlanosScreen() {
-  const { userId, profile, isDemo, reloadProfile } = useSignedIn();
+  const { userId, profile, reloadProfile } = useSignedIn();
   const [selected, setSelected] = useState<ProviderPlanDetails | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,8 +29,8 @@ export default function PlanosScreen() {
 
   const refresh = useCallback(async () => {
     await reloadProfile();
-    if (!isDemo) setSubscriptions(await listSubscriptions(userId).catch(() => []));
-  }, [reloadProfile, userId, isDemo]);
+    setSubscriptions(await listSubscriptions(userId).catch(() => []));
+  }, [reloadProfile, userId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -177,9 +177,6 @@ export default function PlanosScreen() {
           </View>
         ))}
         {plan?.note ? <Text style={styles.bodyText}>{plan.note}</Text> : null}
-        {isDemo ? (
-          <Text style={styles.bodyText}>Modo de demonstração: o pagamento funciona quando o app estiver ligado ao banco de dados e ao Mercado Pago.</Text>
-        ) : null}
         {isCurrent ? (
           <>
             <View style={plans.currentPill}><Text style={plans.currentText}>ESTE É O SEU PLANO ATUAL</Text></View>

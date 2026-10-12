@@ -9,15 +9,13 @@ import { styles } from '@/theme/styles';
 import { AppIcon, Avatar } from './ui';
 
 /** Card de profissional "Bem avaliados" (layout Interface do contratante). */
-export function ProviderCard({ provider, demo, onPress }: { provider: Profile; demo?: boolean; onPress: () => void }) {
+export function ProviderCard({ provider, onPress }: { provider: Profile; onPress: () => void }) {
   const badge = planBadge(provider.plan);
   return (
     <TouchableOpacity style={card.container} onPress={onPress} accessibilityRole="button" accessibilityLabel={provider.full_name}>
       <Avatar name={provider.full_name} uri={provider.avatar_url} size={64} shape="rounded" placeholder="person" />
       <View style={card.body}>
-        {demo ? (
-          <View style={card.chip}><Text style={card.chipText}>PERFIL DEMONSTRATIVO</Text></View>
-        ) : badge ? (
+        {badge ? (
           <View style={[card.chip, { backgroundColor: C.amberLight }]}><Text style={[card.chipText, { color: '#92400E' }]}>{badge}</Text></View>
         ) : null}
         <Text style={styles.professionalName} numberOfLines={1}>{provider.full_name}</Text>

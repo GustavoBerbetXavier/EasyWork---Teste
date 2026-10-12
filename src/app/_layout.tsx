@@ -24,7 +24,19 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { ready, userId, profile, profileError, reloadProfile, signOut } = useAuth();
+  const { ready, configured, userId, profile, profileError, onboarded, reloadProfile, signOut } = useAuth();
+
+  if (!configured) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16, backgroundColor: C.bg }}>
+        <AppIcon name="construct-outline" size={34} color={C.muted} />
+        <Text style={styles.pageTitle}>App em manutenção</Text>
+        <Text style={styles.bodyText}>
+          O EASY WORK ainda não está ligado ao banco de dados. Configure EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY (veja CONFIGURACAO.md).
+        </Text>
+      </View>
+    );
+  }
 
   if (!ready || (userId && !profile && !profileError)) return <LoadingView />;
 
@@ -52,7 +64,10 @@ function RootNavigator() {
         <Stack.Screen name="cadastro" />
         <Stack.Screen name="recuperar-senha" />
       </Stack.Protected>
-      <Stack.Protected guard={signedIn}>
+      <Stack.Protected guard={signedIn && !onboarded}>
+        <Stack.Screen name="configuracao" />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn && onboarded}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="chat/[id]" options={{ contentStyle: { backgroundColor: C.white } }} />
         <Stack.Screen name="profissional/[id]" />

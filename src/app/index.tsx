@@ -3,8 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { AuthScreen, auth } from '@/components/AuthScreen';
-import { AppIcon, DemoNotice, type IconName } from '@/components/ui';
-import { useAuth } from '@/lib/auth';
+import { AppIcon, type IconName } from '@/components/ui';
 import type { Role } from '@/lib/types';
 import { C } from '@/theme/colors';
 
@@ -29,7 +28,6 @@ const OPTIONS: { role: Role; title: string; description: string; icon: IconName;
 
 /** Tela inicial: separa contratante de profissional antes do login. */
 export default function WelcomeScreen() {
-  const { isDemo } = useAuth();
   return (
     <AuthScreen
       showBack={false}
@@ -57,7 +55,6 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
         ))}
       </View>
-      {isDemo ? <DemoNotice text="Modo de demonstração: o app ainda não está ligado ao banco de dados. Qualquer e-mail e senha funcionam." /> : null}
     </AuthScreen>
   );
 }

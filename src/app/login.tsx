@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { AuthScreen, auth } from '@/components/AuthScreen';
-import { AuthField, Checkbox, DemoNotice, PasswordToggle, PrimaryButton } from '@/components/ui';
+import { AuthField, Checkbox, PasswordToggle, PrimaryButton } from '@/components/ui';
 import { authErrorMessage, useAuth } from '@/lib/auth';
 import { isValidEmail, notify } from '@/lib/format';
 import type { Role } from '@/lib/types';
@@ -11,7 +11,7 @@ import type { Role } from '@/lib/types';
 export default function LoginScreen() {
   const params = useLocalSearchParams<{ role?: string }>();
   const role: Role = params.role === 'profissional' ? 'profissional' : 'contratante';
-  const { signIn, isDemo } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -93,7 +93,6 @@ export default function LoginScreen() {
         </View>
         {errors.form ? <Text style={auth.formError}>{errors.form}</Text> : null}
         <PrimaryButton label="Entrar" onPress={submit} loading={loading} />
-        {isDemo ? <DemoNotice text="Modo de demonstração: entre usando qualquer e-mail e senha preenchidos." /> : null}
       </View>
     </AuthScreen>
   );

@@ -16,10 +16,10 @@ const FILTERS = ['Todos', ...CATEGORY_NAMES];
 
 export function ServiceSearch() {
   const params = useLocalSearchParams<{ q?: string; categoria?: string; t?: string }>();
-  const { profile, isDemo } = useSignedIn();
+  const { profile } = useSignedIn();
   const [query, setQuery] = useState(params.q ?? '');
   const [category, setCategory] = useState(params.categoria ?? '');
-  const [allCities, setAllCities] = useState(isDemo);
+  const [allCities, setAllCities] = useState(false);
   const [results, setResults] = useState<Profile[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -49,7 +49,7 @@ export function ServiceSearch() {
     };
   }, [query, category, allCities, profile.city, reloadKey]);
 
-  const label = isDemo ? (results?.length === 1 ? 'resultado demonstrativo' : 'resultados demonstrativos') : results?.length === 1 ? 'resultado' : 'resultados';
+  const label = results?.length === 1 ? 'resultado' : 'resultados';
 
   return (
     <ScrollView style={styles.screenBg} contentContainerStyle={styles.pageContent} keyboardShouldPersistTaps="handled">
@@ -87,13 +87,11 @@ export function ServiceSearch() {
           );
         })}
       </ScrollView>
-      {!isDemo ? (
-        <TouchableOpacity style={styles.locationLine} onPress={() => setAllCities((value) => !value)}>
+      <TouchableOpacity style={styles.locationLine} onPress={() => setAllCities((value) => !value)}>
           <AppIcon name={allCities ? 'globe-outline' : 'location-outline'} color={C.teal} size={14} />
           <Text style={styles.serviceArea}>{allCities ? 'Todas as cidades' : profile.city || 'Sua cidade'}</Text>
           <Text style={styles.actionText}>{allCities ? 'Só minha cidade' : 'Ver todas as cidades'}</Text>
         </TouchableOpacity>
-      ) : null}
       {error ? <ErrorBanner message={error} onRetry={() => setReloadKey((value) => value + 1)} /> : null}
       {results === null && !error ? <View style={{ height: 160 }}><LoadingView /></View> : null}
       {results ? <Text style={styles.resultLabel}>{results.length} {label.toUpperCase()}</Text> : null}
@@ -103,9 +101,7 @@ export function ServiceSearch() {
           <View style={styles.serviceCardInfo}>
             <View style={styles.rowWrap}>
               <Text style={styles.professionalName}>{provider.full_name}</Text>
-              {isDemo ? (
-                <View style={styles.miniDemoTag}><Text style={styles.miniDemoTagText}>DEMO</Text></View>
-              ) : planBadge(provider.plan) ? (
+              {planBadge(provider.plan) ? (
                 <View style={styles.miniDemoTag}><Text style={styles.miniDemoTagText}>{planBadge(provider.plan)}</Text></View>
               ) : null}
             </View>
@@ -142,12 +138,6 @@ export function ServiceSearch() {
             }
           }}
         />
-      ) : null}
-      {isDemo ? (
-        <View style={styles.demoInfoWide}>
-          <AppIcon name="information-circle-outline" color={C.tealDark} size={17} />
-          <Text style={styles.demoNoticeText}>Os profissionais e as avaliações desta tela são fictícios e servem apenas para visualizar a interface.</Text>
-        </View>
       ) : null}
     </ScrollView>
   );

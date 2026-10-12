@@ -108,7 +108,7 @@ export function SectionHeader({ title, action, onPress }: { title: string; actio
   );
 }
 
-/** Selo com bolinha, como "CAIXA DE ENTRADA" e "DEMONSTRAÇÃO DO PRESTADOR". */
+/** Selo com bolinha, como "CAIXA DE ENTRADA" e "ÁREA DO PRESTADOR". */
 export function DotPill({ label, tone = 'teal', style }: { label: string; tone?: 'teal' | 'gray'; style?: StyleProp<ViewStyle> }) {
   const teal = tone === 'teal';
   return (
@@ -227,16 +227,6 @@ export function ErrorBanner({ message, onRetry }: { message: string; onRetry?: (
           <Text style={[styles.actionText, { color: C.red }]}>Tentar de novo</Text>
         </TouchableOpacity>
       ) : null}
-    </View>
-  );
-}
-
-/** Aviso do modo demonstração (some quando o Supabase estiver configurado). */
-export function DemoNotice({ text }: { text: string }) {
-  return (
-    <View style={styles.demoNotice}>
-      <AppIcon name="information-circle-outline" color={C.tealDark} size={15} />
-      <Text style={styles.demoNoticeText}>{text}</Text>
     </View>
   );
 }

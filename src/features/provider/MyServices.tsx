@@ -21,14 +21,14 @@ const SERVICE_ICONS: { icon: IconName; background: string; color: string }[] = [
 ];
 
 export function MyServices() {
-  const { userId, profile, isDemo } = useSignedIn();
+  const { userId, profile } = useSignedIn();
   const [services, setServices] = useState<Service[] | null>(null);
   const [photos, setPhotos] = useState<PortfolioPhoto[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Service | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const limits = isDemo ? PLAN_LIMITS.plus : PLAN_LIMITS[profile.plan];
+  const limits = PLAN_LIMITS[profile.plan];
   const portfolioAllowed = limits.photos > 0;
 
   const load = useCallback(async () => {
@@ -104,7 +104,7 @@ export function MyServices() {
         <NotificationsButton />
       </View>
       <View style={{ gap: 6 }}>
-        <DotPill label={isDemo ? 'ÁREA DO PROFISSIONAL · DEMO' : 'ÁREA DO PROFISSIONAL'} />
+        <DotPill label="ÁREA DO PROFISSIONAL" />
         <Text style={mine.title}>Meus serviços</Text>
         <Text style={mine.subtitle}>Organize o que você oferece aos clientes.</Text>
       </View>
@@ -132,7 +132,6 @@ export function MyServices() {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Serviços cadastrados</Text>
-        {isDemo ? <Text style={styles.resultLabel}>EXEMPLOS</Text> : null}
       </View>
       {error ? <ErrorBanner message={error} onRetry={load} /> : null}
       {services === null && !error ? <ActivityIndicator color={C.teal} /> : null}

@@ -1,8 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import { endDemoSession, getMyProfile, startDemoSession, updateMyProfile } from './api';
-import { DEMO_USER_ID } from './demo';
+import { getMyProfile, updateMyProfile } from './api';
 import { isSupabaseConfigured, setRememberMe, supabase } from './supabase';
 import type { PrivateInfo, Profile, Role } from './types';
 
@@ -10,10 +9,12 @@ type SignUpInput = { email: string; password: string; fullName: string; phone: s
 
 type AuthContextValue = {
   ready: boolean;
-  isDemo: boolean;
+  configured: boolean;
   userId: string | null;
   email: string | null;
   emailConfirmed: boolean;
+  /** `false` até a pessoa concluir o passo a passo de configuração. */
+  onboarded: boolean;
   profile: Profile | null;
   privateInfo: PrivateInfo | null;
   profileError: string | null;
@@ -24,6 +25,7 @@ type AuthContextValue = {
   resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   reloadProfile: () => Promise<void>;
   saveProfile: (patch: Partial<Profile>, privatePatch?: Partial<PrivateInfo>) => Promise<void>;
+  finishOnboarding: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -44,9 +46,8 @@ export function authErrorMessage(error: unknown): string {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [ready, setReady] = useState(!supabase);
+  const [ready, setReady] = useState(!isSupabaseConfigured);
   const [session, setSession] = useState<Session | null>(null);
-  const [demoUser, setDemoUser] = useState<{ id: string; email: string } | null>(null);
   // Perfil carregado, sempre ligado ao usuário a que pertence (ao sair, deixa de valer sozinho).
   const [loaded, setLoaded] = useState<{ userId: string; profile: Profile | null; privateInfo: PrivateInfo | null; error: string | null } | null>(null);
   // Durante a redefinição de senha a sessão só é liberada depois de trocar a senha.
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pendingSession = useRef<Session | null>(null);
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!isSupabaseConfigured) return;
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setReady(true);
@@ -69,8 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  const userId = supabase ? session?.user.id ?? null : demoUser?.id ?? null;
-  const email = supabase ? session?.user.email ?? null : demoUser?.email ?? null;
+  const userId = session?.user.id ?? null;
+  const email = session?.user.email ?? null;
 
   const profile = loaded && loaded.userId === userId ? loaded.profile : null;
   const privateInfo = loaded && loaded.userId === userId ? loaded.privateInfo : null;
@@ -97,38 +98,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [userId, fetchProfile]);
 
   const signIn = useCallback(async (rawEmail: string, password: string, remember: boolean, chosenRole: Role) => {
-    const cleanEmail = rawEmail.trim().toLowerCase();
-    if (!supabase) {
-      const me = startDemoSession(chosenRole);
-      setLoaded(null);
-      setDemoUser({ id: DEMO_USER_ID, email: cleanEmail });
-      return me.role;
-    }
     setRememberMe(remember);
-    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: rawEmail.trim().toLowerCase(), password });
     if (error) throw new Error(authErrorMessage(error));
     const { data: row } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
     return (row?.role as Role) ?? chosenRole;
   }, []);
 
   const signUp = useCallback(async (input: SignUpInput) => {
-    const cleanEmail = input.email.trim().toLowerCase();
-    if (!supabase) {
-      startDemoSession(input.role, input.fullName);
-      setLoaded(null);
-      setDemoUser({ id: DEMO_USER_ID, email: cleanEmail });
-      return { needsConfirmation: false };
-    }
     setRememberMe(true);
     const { data, error } = await supabase.auth.signUp({
-      email: cleanEmail,
+      email: input.email.trim().toLowerCase(),
       password: input.password,
       options: {
-        data: { full_name: input.fullName.trim(), phone: input.phone.trim(), city: input.city.trim(), role: input.role },
+        data: { full_name: input.fullName.trim(), phone: input.phone.trim(), city: input.city.trim(), role: input.role, onboarded: false },
       },
     });
     if (error) throw new Error(authErrorMessage(error));
-    // Com "Confirm email" ligado no Supabase, o cadastro volta sem sessão até a pessoa confirmar o e-mail.
     // Se identities vier vazio, o e-mail já estava cadastrado.
     if (data.user && data.user.identities && data.user.identities.length === 0) {
       throw new Error('Este e-mail já tem cadastro. Entre ou recupere sua senha.');
@@ -138,22 +124,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     setLoaded(null);
-    if (!supabase) {
-      endDemoSession();
-      setDemoUser(null);
-      return;
-    }
     await supabase.auth.signOut();
   }, []);
 
   const sendRecoveryCode = useCallback(async (rawEmail: string) => {
-    if (!supabase) return;
     const { error } = await supabase.auth.resetPasswordForEmail(rawEmail.trim().toLowerCase());
     if (error) throw new Error(authErrorMessage(error));
   }, []);
 
   const resetPassword = useCallback(async (rawEmail: string, code: string, newPassword: string) => {
-    if (!supabase) return;
     holdSession.current = true;
     try {
       const { error } = await supabase.auth.verifyOtp({ email: rawEmail.trim().toLowerCase(), token: code.trim(), type: 'recovery' });
@@ -185,12 +164,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoaded({ userId, profile: result.profile, privateInfo: result.private, error: null });
   }, [userId]);
 
+  const finishOnboarding = useCallback(async () => {
+    const { data, error } = await supabase.auth.updateUser({ data: { onboarded: true } });
+    if (error) throw new Error(authErrorMessage(error));
+    if (data.user) setSession((current) => (current ? { ...current, user: data.user } : current));
+  }, []);
+
   const value = useMemo<AuthContextValue>(() => ({
     ready,
-    isDemo: !isSupabaseConfigured,
+    configured: isSupabaseConfigured,
     userId,
     email,
-    emailConfirmed: supabase ? Boolean(session?.user.email_confirmed_at) : true,
+    emailConfirmed: Boolean(session?.user.email_confirmed_at),
+    onboarded: session?.user.user_metadata?.onboarded === true,
     profile,
     privateInfo,
     profileError,
@@ -201,7 +187,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resetPassword,
     reloadProfile,
     saveProfile,
-  }), [ready, userId, email, session, profile, privateInfo, profileError, signIn, signUp, signOut, sendRecoveryCode, resetPassword, reloadProfile, saveProfile]);
+    finishOnboarding,
+  }), [ready, userId, email, session, profile, privateInfo, profileError, signIn, signUp, signOut, sendRecoveryCode, resetPassword, reloadProfile, saveProfile, finishOnboarding]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

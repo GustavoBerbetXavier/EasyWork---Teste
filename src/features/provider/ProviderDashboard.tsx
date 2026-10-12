@@ -13,7 +13,7 @@ import { C } from '@/theme/colors';
 import { styles } from '@/theme/styles';
 
 export function ProviderDashboard() {
-  const { userId, profile, isDemo, saveProfile } = useSignedIn();
+  const { userId, profile, saveProfile } = useSignedIn();
   const [stats, setStats] = useState<ProviderStats | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState<'is_active' | 'available' | null>(null);
@@ -37,7 +37,7 @@ export function ProviderDashboard() {
 
   const firstName = profile.full_name.split(' ')[0] || 'profissional';
   // Visualizações e contatos fazem parte dos planos Premium e Empresarial.
-  const statsUnlocked = isDemo || PLAN_LIMITS[profile.plan].stats;
+  const statsUnlocked = PLAN_LIMITS[profile.plan].stats;
   const items: { value: string; label: string; icon: IconName; background: string; color: string; locked?: boolean }[] = [
     { value: statsUnlocked ? String(stats?.views ?? 0) : '–', label: 'Visualizações', icon: 'stats-chart-outline', background: C.tealLight, color: C.teal, locked: !statsUnlocked },
     { value: statsUnlocked ? String(stats?.contacts ?? 0) : '–', label: 'Contatos', icon: 'chatbox-outline', background: C.amberLight, color: '#D97706', locked: !statsUnlocked },
@@ -52,7 +52,7 @@ export function ProviderDashboard() {
         <NotificationsButton />
       </View>
       <View style={{ gap: 6 }}>
-        <DotPill label={isDemo ? 'DEMONSTRAÇÃO DO PRESTADOR' : 'ÁREA DO PRESTADOR'} />
+        <DotPill label="ÁREA DO PRESTADOR" />
         <Text style={dash.hello}>Olá, {firstName}!</Text>
         <Text style={dash.subtitle}>Acompanhe seu perfil e seus resultados.</Text>
       </View>

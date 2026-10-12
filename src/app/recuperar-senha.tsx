@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { AuthScreen, auth } from '@/components/AuthScreen';
-import { AuthField, DemoNotice, PasswordToggle, PrimaryButton } from '@/components/ui';
+import { AuthField, PasswordToggle, PrimaryButton } from '@/components/ui';
 import { authErrorMessage, useAuth } from '@/lib/auth';
 import { isValidEmail, notify, passwordProblem } from '@/lib/format';
 import type { Role } from '@/lib/types';
@@ -14,7 +14,7 @@ const RESEND_SECONDS = 60;
 export default function RecoverPasswordScreen() {
   const params = useLocalSearchParams<{ role?: string; email?: string }>();
   const role: Role = params.role === 'profissional' ? 'profissional' : 'contratante';
-  const { sendRecoveryCode, resetPassword, isDemo } = useAuth();
+  const { sendRecoveryCode, resetPassword } = useAuth();
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState(params.email ?? '');
   const [code, setCode] = useState('');
@@ -34,10 +34,6 @@ export default function RecoverPasswordScreen() {
   const sendCode = async () => {
     if (!isValidEmail(email)) {
       setErrors({ email: 'Digite um e-mail válido.' });
-      return;
-    }
-    if (isDemo) {
-      notify('Modo de demonstração', 'A recuperação de senha funciona quando o app estiver ligado ao banco de dados (Supabase).');
       return;
     }
     setErrors({});
@@ -104,7 +100,6 @@ export default function RecoverPasswordScreen() {
           />
           {errors.form ? <Text style={auth.formError}>{errors.form}</Text> : null}
           <PrimaryButton label="Enviar código" onPress={sendCode} loading={loading} />
-          {isDemo ? <DemoNotice text="Modo de demonstração: a recuperação de senha será ativada quando o Supabase estiver configurado." /> : null}
         </View>
       ) : (
         <View style={auth.form}>

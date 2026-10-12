@@ -31,7 +31,7 @@ import { styles } from '@/theme/styles';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { userId, profile, isDemo } = useSignedIn();
+  const { userId, profile } = useSignedIn();
   const { refresh: refreshInbox } = useInbox();
   const [other, setOther] = useState<Profile | null>(null);
   const [subject, setSubject] = useState('');
@@ -119,9 +119,7 @@ export default function ChatScreen() {
   };
 
   const otherIsProvider = other?.role === 'profissional';
-  const subtitle = isDemo
-    ? `${otherIsProvider ? 'Prestador' : 'Contratante'} · conversa demonstrativa`
-    : otherIsProvider
+  const subtitle = otherIsProvider
       ? `Prestador${other?.specialty ? ` · ${other.specialty}` : ''}`
       : `Contratante${other?.city ? ` · ${other.city}` : ''}`;
 
@@ -191,11 +189,6 @@ export default function ChatScreen() {
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
             ListHeaderComponent={
               <View style={{ gap: 13, marginBottom: 13 }}>
-                {isDemo ? (
-                  <View style={chat.demoChip}>
-                    <Text style={chat.demoChipText}>DADOS DE DEMONSTRAÇÃO</Text>
-                  </View>
-                ) : null}
                 {subject ? (
                   <View style={[styles.subjectCard, { marginTop: 0 }]}>
                     <View style={[styles.subjectIcon, { backgroundColor: C.amberLight }]}>
@@ -204,7 +197,7 @@ export default function ChatScreen() {
                     <View style={{ flex: 1 }}>
                       <Text style={styles.subjectEyebrow}>ASSUNTO DA CONVERSA</Text>
                       <Text style={styles.subjectTitle}>{subject}</Text>
-                      <Text style={styles.subjectSub}>{isDemo ? 'Solicitação demonstrativa' : 'Combine detalhes, valores e horários por aqui.'}</Text>
+                      <Text style={styles.subjectSub}>Combine detalhes, valores e horários por aqui.</Text>
                     </View>
                   </View>
                 ) : null}
