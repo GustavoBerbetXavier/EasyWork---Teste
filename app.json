@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "EasyWork",
+    "slug": "EasyWork",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.gustavoberbet.EasyWork"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "EASY WORK"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5002536b-b695-42c8-8236-d657956dd0a4"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-sqlite",
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O EASY WORK precisa acessar suas fotos para você escolher uma imagem de perfil ou de capa."
+        }
+      ]
+    ],
+    "scheme": "easywork"
+  }
+}
