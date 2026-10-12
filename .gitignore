@@ -45,3 +45,4 @@ yarn-error.*
 
 # IDE
 .idea/
+supabase/.env.secrets

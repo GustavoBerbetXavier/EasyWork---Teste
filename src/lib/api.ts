@@ -263,6 +263,8 @@ export async function sendMessage(conversationId: string, userId: string, body: 
     .select('*')
     .single();
   fail(error);
+  // Avisa o outro participante (notificação no celular/navegador). Não trava o envio se falhar.
+  supabase.functions.invoke('notify-message', { body: { message_id: data.id } }).catch(() => {});
   return data;
 }
 

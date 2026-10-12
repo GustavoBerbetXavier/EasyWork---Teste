@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getMyProfile, updateMyProfile } from './api';
+import { disablePushForThisDevice } from './push';
 import { isSupabaseConfigured, setRememberMe, supabase } from './supabase';
 import type { PrivateInfo, Profile, Role } from './types';
 
@@ -123,6 +124,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    // Este aparelho deixa de receber as notificações da conta que está saindo.
+    await disablePushForThisDevice().catch(() => {});
     setLoaded(null);
     await supabase.auth.signOut();
   }, []);

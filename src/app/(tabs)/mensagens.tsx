@@ -2,6 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { NotificationsPrompt } from '@/components/NotificationsPrompt';
 import { AppIcon, Avatar, DotPill, EmptyState, ErrorBanner } from '@/components/ui';
 import { useSignedIn } from '@/lib/auth';
 import { formatInboxTime } from '@/lib/format';
@@ -10,7 +11,7 @@ import { C } from '@/theme/colors';
 import { styles } from '@/theme/styles';
 
 export default function MensagensScreen() {
-  const { profile } = useSignedIn();
+  const { userId, profile } = useSignedIn();
   const { conversations, loading, error, refresh } = useInbox();
   const [search, setSearch] = useState('');
   const [unreadOnly, setUnreadOnly] = useState(false);
@@ -49,6 +50,7 @@ export default function MensagensScreen() {
         <Text style={inbox.title}>Mensagens</Text>
         <Text style={inbox.subtitle}>Conversas com clientes e profissionais.</Text>
       </View>
+      <NotificationsPrompt userId={userId} compact />
       <View style={styles.searchBar}>
         <AppIcon name="search-outline" color={C.muted} size={20} />
         <TextInput value={search} onChangeText={setSearch} placeholder="Buscar conversas..." placeholderTextColor={C.muted} style={styles.searchInput} />

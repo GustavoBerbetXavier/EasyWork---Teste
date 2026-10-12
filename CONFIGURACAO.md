@@ -44,7 +44,25 @@ npx supabase functions deploy mercadopago-webhook --no-verify-jwt
 
 Preços: `src/lib/plans.ts` (app) e `supabase/functions/mercadopago-checkout/index.ts` (servidor). Mantenha os dois iguais.
 
-## 3. Gerar o APK
+## 3. Notificações de mensagens
+
+1. **SQL Editor > New query**: cole `supabase/migrations/0002_notificacoes.sql` e clique em **Run**.
+2. Publique a função e as chaves (o arquivo `supabase/.env.secrets` fica só no seu computador):
+
+```
+npx supabase secrets set --env-file supabase/.env.secrets
+npx supabase functions deploy notify-message
+```
+
+3. Na Vercel, adicione também `EXPO_PUBLIC_VAPID_PUBLIC_KEY` (o valor está no `.env`) e faça Redeploy.
+4. No app, toque em **Ativar** no aviso de notificações (em Mensagens ou no Perfil).
+
+- Computador e Android (Chrome/Edge/Firefox): funciona direto pelo site.
+- iPhone: só depois de **Adicionar à Tela de Início** e abrir pelo ícone (iOS 16.4 ou mais novo).
+- APK: precisa das credenciais do Firebase (FCM) cadastradas no EAS: https://docs.expo.dev/push-notifications/fcm-credentials/
+  O Expo Go não recebe notificações; teste no APK.
+
+## 4. Gerar o APK
 
 ```
 npx eas-cli@latest build -p android --profile preview

@@ -1,12 +1,13 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppIcon, LoadingView, PrimaryButton } from '@/components/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { InboxProvider } from '@/lib/inbox';
+import { syncPush, usePushNavigation } from '@/lib/push';
 import { C } from '@/theme/colors';
 import { styles } from '@/theme/styles';
 
@@ -55,6 +56,20 @@ function RootNavigator() {
   }
 
   const signedIn = Boolean(userId && profile);
+
+  return <SignedInEffects userId={signedIn ? userId : null}><AppStack signedIn={signedIn} onboarded={onboarded} /></SignedInEffects>;
+}
+
+/** Com a conta aberta: registra este aparelho para notificações e abre a conversa ao tocar na notificação. */
+function SignedInEffects({ userId, children }: { userId: string | null; children: React.ReactNode }) {
+  usePushNavigation(Boolean(userId));
+  useEffect(() => {
+    if (userId) syncPush(userId);
+  }, [userId]);
+  return <>{children}</>;
+}
+
+function AppStack({ signedIn, onboarded }: { signedIn: boolean; onboarded: boolean }) {
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.bg } }}>

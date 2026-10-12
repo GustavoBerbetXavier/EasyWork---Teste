@@ -13,6 +13,7 @@ import {
   SkillChips,
   initials,
 } from '@/components/profile';
+import { NotificationsPrompt } from '@/components/NotificationsPrompt';
 import { AppIcon, ErrorBanner } from '@/components/ui';
 import { uploadImage } from '@/lib/api';
 import { useSignedIn } from '@/lib/auth';
@@ -388,6 +389,10 @@ export default function PerfilScreen() {
         <AppIcon name="chevron-forward" color="#99F6E4" size={17} />
       </TouchableOpacity>
       ) : null}
+
+      <View style={{ marginHorizontal: 15 }}>
+        <NotificationsPrompt userId={userId} />
+      </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <AppIcon name="log-out-outline" size={18} color={C.red} />
